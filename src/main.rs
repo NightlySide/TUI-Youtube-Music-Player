@@ -1,4 +1,4 @@
-use std::io;
+use std::{io, time::Duration};
 
 use crossterm::{
     event::{DisableMouseCapture, EnableMouseCapture},
@@ -32,7 +32,8 @@ async fn start_app(yt_client: Box<YoutubeClient>) -> Result<(), io::Error> {
 
     // running the app
     let mut app = app::App::new(yt_client);
-    let run_res = app.run_app(&mut terminal).await;
+    let tick_rate = Duration::from_millis(250);
+    let run_res = app.run_app(&mut terminal, tick_rate).await;
 
     // restoring the context
     disable_raw_mode()?;

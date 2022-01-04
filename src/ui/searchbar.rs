@@ -7,34 +7,31 @@ use tui::{
 };
 //use unicode_width::UnicodeWidthStr;
 
-use crate::app::{App, InputMode};
+use crate::app::{App, Screen};
 
-pub fn draw<B: Backend>(frame: &mut Frame<B>, app: &App, layout_chunk: Rect) {
-    let msg = match app.input_mode {
-        InputMode::Normal => app.input.clone(),
-        InputMode::Editing => {
+pub fn draw<B: Backend>(frame: &mut Frame<B>, app: &mut App, layout_chunk: Rect) {
+    let msg = match app.focused_screen {
+        Screen::SearchBar => {
             let mut msg = String::from("> ");
             msg.push_str(&app.input);
             msg
         }
+        _ => app.input.clone(),
     };
 
     let input = Paragraph::new(msg)
-        .style(match app.input_mode {
-            InputMode::Normal => Style::default(),
-            InputMode::Editing => Style::default().fg(Color::LightRed),
+        .style(match app.focused_screen {
+            Screen::SearchBar => Style::default().fg(Color::LightRed),
+            _ => Style::default(),
         })
         .block(Block::default().borders(Borders::ALL).title("Search"));
 
     frame.render_widget(input, layout_chunk);
+    app.widget_rects.insert(Screen::SearchBar, layout_chunk);
 
     // showing the cursor
-    match app.input_mode {
-        InputMode::Normal =>
-            // Hide the cursor. `Frame` does this by default, so we don't need to do anything here
-            {}
-
-        InputMode::Editing => {
+    match app.focused_screen {
+        Screen::SearchBar => {
             // Make the cursor visible and ask tui-rs to put it at the specified coordinates after rendering
             frame.set_cursor(
                 // Put cursor past the end of the input text
@@ -43,5 +40,8 @@ pub fn draw<B: Backend>(frame: &mut Frame<B>, app: &App, layout_chunk: Rect) {
                 layout_chunk.y + 1,
             )
         }
+        _ =>
+        // Hide the cursor. `Frame` does this by default, so we don't need to do anything here
+        {}
     }
 }
