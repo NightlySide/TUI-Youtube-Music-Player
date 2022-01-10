@@ -119,6 +119,7 @@ impl App {
                         videos.iter().for_each(|video| 
                             self.search_results.items.push((utils::display_video_line(video.clone()), video.clone()))
                         );
+                        self.focused_screen = Screen::SearchResults;
                     }
                     KeyCode::Char(c) => {
                         self.input.insert(self.input_cursor_position, c);
